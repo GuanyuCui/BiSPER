@@ -12,7 +12,7 @@
 #include <queue>
 #include <algorithm>
 
-#include "include/eigen-3.4.0/Eigen/Sparse"
+#include "eigen-3.4.0/Eigen/Sparse"
 
 class Graph
 {

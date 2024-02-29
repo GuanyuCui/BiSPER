@@ -14,10 +14,10 @@
 	error "Missing the <filesystem> header."
 #endif
 
-#include "graph.h"
-#include "node_sampler.h"
-#include "spalgorithms.h"
-#include "timer.h"
+#include "../include/graph.h"
+#include "../include/node_sampler.h"
+#include "../include/spalgorithms.h"
+#include "../include/timer.h"
 
 void print_duration(const Timer & timer, const std::string & unit = "ms")
 {

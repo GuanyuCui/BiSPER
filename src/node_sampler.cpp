@@ -1,4 +1,4 @@
-#include "node_sampler.h"
+#include "../include/node_sampler.h"
 
 std::vector<Graph::size_type> NodeSampler_Tools::read_node_ids(const char * file_name)
 {

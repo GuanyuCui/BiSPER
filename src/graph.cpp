@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "../include/graph.h"
 
 Graph::Graph() : num_nodes(0), num_edges(0), d_min(0), d_max(0), max_degree_node(0), transition_matrix(), is_transition_matrix_valid(false)
 {

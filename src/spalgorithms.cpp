@@ -5,7 +5,7 @@
 #include <utility>
 #include <algorithm>
 
-#include "spalgorithms.h"
+#include "../include/spalgorithms.h"
 
 // -------------------- SinglePairAlgorithms --------------------
 // -------------------- Public --------------------
@@ -999,7 +999,7 @@ double SinglePairAlgorithms::AdaptiveMonteCarlo_BiSPER(Graph::size_type s, Graph
 		// Random variable T_k.
 		double T_k = 0.0;
 		Graph::size_type now_node = t;
-		T_k += ((now_node == t) ? 1.0 / d_t : 0.0 - (now_node == s) ? 1.0 / d_s : 0.0);
+		T_k += (((now_node == t) ? 1.0 / d_t : 0.0) - ((now_node == s) ? 1.0 / d_s : 0.0));
 
 		for(Algorithms::length_type l = 1; l <= L_max; l++)
 		{
@@ -1007,11 +1007,11 @@ double SinglePairAlgorithms::AdaptiveMonteCarlo_BiSPER(Graph::size_type s, Graph
 			Graph::degree_type d_node = adjacency_list[now_node].size();
 			std::uniform_int_distribution<Graph::degree_type> dis(0, d_node - 1);
 			now_node = adjacency_list[now_node][dis(gen)];
-			T_k += ((now_node == t) ? 1.0 / d_t : 0.0 - (now_node == s) ? 1.0 / d_s : 0.0);
+			T_k += (((now_node == t) ? 1.0 / d_t : 0.0) - ((now_node == s) ? 1.0 / d_s : 0.0));
 		}
 
 		now_node = s;
-		T_k += ((now_node == s) ? 1.0 / d_s : 0.0 - (now_node == t) ? 1.0 / d_t : 0.0);
+		T_k += (((now_node == s) ? 1.0 / d_s : 0.0) - ((now_node == t) ? 1.0 / d_t : 0.0));
 
 		for(Algorithms::length_type l = 1; l <= L_max; l++)
 		{
@@ -1019,7 +1019,7 @@ double SinglePairAlgorithms::AdaptiveMonteCarlo_BiSPER(Graph::size_type s, Graph
 			Graph::degree_type d_node = adjacency_list[now_node].size();
 			std::uniform_int_distribution<Graph::degree_type> dis(0, d_node - 1);
 			now_node = adjacency_list[now_node][dis(gen)];
-			T_k += ((now_node == s) ? 1.0 / d_s : 0.0 - (now_node == t) ? 1.0 / d_t : 0.0);
+			T_k += (((now_node == s) ? 1.0 / d_s : 0.0) - ((now_node == t) ? 1.0 / d_t : 0.0));
 		}
 
 		sum_T_k += T_k;

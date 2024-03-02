@@ -71,3 +71,31 @@ if __name__ == '__main__':
 					subprocess.run(command, check = True)
 				except subprocess.CalledProcessError as e:
 					print(f"Error calling C++ program: {e}")
+	elif experiment == 'IV':
+		assert dataset == 'ER'
+		dataset = 'ER'
+		if algorithm == 'Bipush':
+			num_sampless = ['1000', '10000']
+			r_maxs = ['1e-6', '1e-5', '1e-4']
+			for r_max, num_samples in itertools.product(r_maxs, num_sampless):
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', num_samples, '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'Push':
+			r_maxs = ['1e-7', '1e-6', '1e-5', '1e-4', '1e-3', '1e-2', '1e-1']
+			for r_max in r_maxs:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', '0', '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		else:
+			epsilons = ['1e-7', '1e-6', '1e-5', '1e-4', '1e-3', '1e-2', '1e-1']
+			for eps in epsilons:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--L_max', 'auto', '--eps', eps]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")

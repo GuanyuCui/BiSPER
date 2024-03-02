@@ -216,6 +216,9 @@ std::vector<double> get_ground_truth(const std::string & dataset_name, Graph & G
 			print_duration(timer, "ms");
 		}
 
+		std::string algorithm_name = (dataset_name == "Friendster" ? "Power-Iteration-Eigen" : "Power-Iteration");
+		alg.init_data_stucture(algorithm_name, L_max);
+
 		double total_time = 0.0;
 		Timer timer;
 		for(size_t i = 0; i < query_nodes.size(); i += 2)
@@ -226,7 +229,6 @@ std::vector<double> get_ground_truth(const std::string & dataset_name, Graph & G
 			// Ground-truth generation.
 			std::cout << "Pair " << i / 2 + 1 << "..." << std::endl;
 			// Run algorithm. 
-			std::string algorithm_name = (dataset_name == "Friendster" ? "Power-Iteration-Eigen" : "Power-Iteration");
 			timer.clear();
 			timer.start();
 			double r = alg.run(algorithm_name, s, t, L_max, 0.0, 0.0);
@@ -301,7 +303,6 @@ std::vector<double> get_ground_truth_parallel(const std::string & dataset_name, 
 	else
 	{
 		std::cout << "Generating ground-truth..." << std::endl;
-		SinglePairAlgorithms alg(G);
 		// Number of query pairs.
 		Graph::size_type num_query_pairs = query_nodes.size() / 2;
 		// Number of threads.
@@ -328,6 +329,10 @@ std::vector<double> get_ground_truth_parallel(const std::string & dataset_name, 
 		// write the results to ret, and the total_time to query_times.
 		auto task = [&](size_t thread_index, size_t start_index, size_t end_index)
 		{
+			SinglePairAlgorithms alg(G);
+			std::string algorithm_name = (dataset_name == "Friendster" ? "Power-Iteration-Eigen" : "Power-Iteration");
+			alg.init_data_stucture(algorithm_name, L_max);
+			
 			double total_time = 0.0;
 			Timer timer;
 			for(size_t index = start_index; index < end_index; index++)

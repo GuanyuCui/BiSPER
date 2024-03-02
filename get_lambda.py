@@ -136,11 +136,8 @@ if __name__ == '__main__':
 	# A = get_largest_connected_component(adj_sparse = adj_sparse)
 	A = adj_sparse
 
-	lambda_n = get_L_lambda_n(A)
-	print('lambda_n = ', lambda_n)
-	
-	lambda_2 = get_L_lambda_2(A)
-	print('lambda_2 = ', lambda_2)
-	
-	print('eps = 1e-2, L_max = ', np.log(100 * np.power(lambda_n, 0.5) / np.power(lambda_2, 1.5)))
+	lam = get_P_lambda(A)
+	print('lambda = ', lam)
+	with open(lambda_path, 'w') as f:
+		f.write(str(lam))
 	

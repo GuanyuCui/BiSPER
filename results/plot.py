@@ -13,7 +13,6 @@ def data2dict(data_str):
     return parsed_dict
 
 def plot_experiment_II(x, y, algorithm2marker, algorithm2color):
-    plt.rcParams['font.family'] = 'Times New Roman'
     dataset_names = ['Facebook', 'DBLP', 'Youtube', 'Orkut', 'LiveJournal', 'Friendster']
     algorithm_names = ['BiSPER', 'GEER', 'AMC']
 
@@ -104,18 +103,15 @@ def plot_experiment_II(x, y, algorithm2marker, algorithm2color):
     fig.legend(bbox_to_anchor = (0.5, 0.97), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
     # Adjusting vertical and horizontal spacing.
     plt.subplots_adjust(hspace = 0.35, wspace = 0.2)
-    plt.savefig('Experiment-II-results-{}-{}.pdf'.format(x, y), bbox_inches = 'tight')
+    plt.savefig('Experiment-II-results-{}-{}.pgf'.format(x, y), bbox_inches = 'tight')
     # plt.show()
     
 def plot_experiment_III(algorithm2marker, algorithm2color):
-    plt.rcParams['font.family'] = 'Times New Roman'
-
     algorithm_names = ['BiSPER', 'GEER', 'Bipush', 'Push']
     columns = ['Algorithm', 'L_max', 'num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
     numeric_columns = ['num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
     
     sns.set_theme(style = "ticks")
-    sns.set_palette("Spectral", 4)
     fig = plt.figure(figsize = (4, 4))
     ax = fig.add_subplot(111)
     
@@ -172,13 +168,75 @@ def plot_experiment_III(algorithm2marker, algorithm2color):
     fig.legend(bbox_to_anchor = (0.5, 1.02), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
     # Make it square.
     ax.set_aspect(1.0 / ax.get_data_ratio(), adjustable = 'box')
-    plt.savefig('Experiment-III-results.pdf', bbox_inches = 'tight')
+    plt.savefig('Experiment-III-results.pgf', bbox_inches = 'tight')
     
-if __name__ == '__main__':
+def plot_experiment_IV(algorithm2marker, algorithm2color):
+    algorithm_names = ['BiSPER', 'GEER', 'Bipush', 'Push']
+    columns = ['Algorithm', 'L_max', 'num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
+    numeric_columns = ['num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
+    
+    sns.set_theme(style = "ticks")
+    fig = plt.figure(figsize = (4, 4))
+    ax = fig.add_subplot(111)
+    
+    # Open output file.
+    f = open('ER.out')
+    # Read contents.
+    data = f.readlines()
+    # To list, to DataFrame.
+    dict_list = [data2dict(data_str) for data_str in data]
+    # Filter columns.
+    df = pd.DataFrame(dict_list)[columns]
+    df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors = 'coerce')
+    # Filter data in Experiment III.
+    df = df[df['L_max'] == 'auto']
+    
+    for algorithm_name in algorithm_names:
+        if algorithm_name == 'Bipush':
+            r_maxs = ['1e-4', '1e-5']
+            for r_max in r_maxs:
+                # Get data of some algorithm, and sort values.
+                tmp_df = df[(df['Algorithm'] == algorithm_name) & (df['r_max'] == float(r_max))]
+                tmp_df = tmp_df.sort_values(by = 'num_samples')
+                if r_max == r_maxs[0]:
+                    # Plot.
+                    ax.plot(tmp_df['avg.time(ms)'], tmp_df['avg.error'], marker = algorithm2marker[algorithm_name], markersize = 7, markeredgewidth = 1.3, markerfacecolor = 'none', label = algorithm_name, color = algorithm2color[algorithm_name])
+                else:
+                    ax.plot(tmp_df['avg.time(ms)'], tmp_df['avg.error'], marker = algorithm2marker[algorithm_name], markersize = 7, markeredgewidth = 1.3, markerfacecolor = 'none', color = algorithm2color[algorithm_name])
+                    
+                ax.annotate(fr'$r_{{\max}} = 10^{{{r_max[-2:]}}}$',
+                            xy = (tmp_df['avg.time(ms)'].iloc[-1], tmp_df['avg.error'].iloc[-1]),
+                            xytext = (12, 12),
+                            textcoords = 'offset points',
+                            fontsize = 13,
+                            usetex = True,
+                            arrowprops = dict(arrowstyle = '->', color = 'black')
+                )
+        else:
+            # Get data of some algorithm, and sort values.
+            tmp_df = df[df['Algorithm'] == algorithm_name]
+            tmp_df = tmp_df.sort_values(by = 'avg.error')
+            # Plot.
+            ax.plot(tmp_df['avg.time(ms)'], tmp_df['avg.error'], marker = algorithm2marker[algorithm_name], markersize = 7, markeredgewidth = 1.3, markerfacecolor = 'none', label = algorithm_name, color = algorithm2color[algorithm_name])
+            
+    ax.set_ylim(1e-11, 1e-1)
+    ax.set_xlim(1e-3, 1e5)
+    
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.tick_params(axis = 'x', labelsize = 14)
+    ax.tick_params(axis = 'y', labelsize = 14)
+    ax.set_ylabel('Average Absolute Error', fontsize = 14)
+    ax.set_xlabel('Average Query Time (ms)', fontsize = 14)
+    
+    fig.legend(bbox_to_anchor = (0.5, 1.02), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
+    # Make it square.
+    ax.set_aspect(1.0 / ax.get_data_ratio(), adjustable = 'box')
+    plt.savefig('Experiment-IV-results.pgf', bbox_inches = 'tight')
+    
+if __name__ == '__main__':    
     algorithm2marker = {'BiSPER' : 'D', 'GEER' : 's', 'AMC' : 'o', 'Bipush': 'p', 'Push': 'h'}
     algorithm2color = {'BiSPER' : 'red', 'GEER' : 'blue', 'AMC' : 'orange', 'Bipush': 'purple', 'Push': 'teal'}
     plot_experiment_II(x = 'avg.time(ms)', y = 'avg.error', algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)
-    # plot_experiment_II(x = 'avg.time(ms)', y = 'max.error', algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)
     plot_experiment_III(algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)
-    
-    pass
+    plot_experiment_IV(algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)

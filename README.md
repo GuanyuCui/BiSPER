@@ -95,11 +95,11 @@ Below are the detailed explanations of the arguments that can be used with the p
 
 - `--L_max`: Defines the maximum number of steps, denoted as $L_{\max}$. Users can input an integer or specify `auto`, which calculates $L_{\max}$ based on lambda and epsilon values. This argument is applicable only to the `BiSPER`, `AMC`, and `GEER` algorithms. The default value is `100`.
 
-- `--eps`: Sets the desired absolute error guarantee, $\epsilon$. This parameter is relevant only for the `BiSPER`, `AMC`, and `GEER` algorithms. The default value is $1 \times 10^{-2}$.
+- `--eps`: Sets the desired absolute error guarantee, $\epsilon$. This parameter is relevant only for the `BiSPER`, `AMC`, and `GEER` algorithms. The default value is ```1e-2```.
 
 - `--num_samples`: Indicates the number of random walks to sample in the `Bipush` algorithm. The default is `10,000`.
 
-- `--r_max`: Specifies the push threshold for both the `Bipush` and `Push` algorithms. The default value is $1 \times 10^{-4}$.
+- `--r_max`: Specifies the push threshold for both the `Bipush` and `Push` algorithms. The default value is ```1e-4```.
 
 
 

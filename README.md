@@ -5,7 +5,7 @@ Welcome to the official BiSPER documentation. This guide offers a step-by-step w
 ## Environment Setup
 
 ### Requirements
-- **Tools**: gcc (version 7.5 or newer), Python 3.x
+- **Tools**: gcc (version 7.5 or newer), Python 3.x, Eigen 3.4
 
 ### Setup Instructions
 1. Clone the repository to your local machine.

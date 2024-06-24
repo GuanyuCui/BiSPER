@@ -1,6 +1,6 @@
 # BiSPER
 
-Welcome to the official BiSPER documentation. This guide offers a step-by-step walkthrough to replicate our experiments, covering everything from dataset preparation and code compilation to running experiments and plotting results. 
+Welcome to the official BiSPER documentation. This guide provides a comprehensive walkthrough to replicate our experiments, covering everything from dataset preparation and code compilation to running experiments and plotting results.
 
 ## Environment Setup
 
@@ -19,11 +19,13 @@ Welcome to the official BiSPER documentation. This guide offers a step-by-step w
 
 ### Preparing Datasets
 
+**Note**: To save time, it is recommended to proceed directly to step 3.
+
 1. **Original Real-World Datasets**: Obtain these from the [SNAP dataset page](https://snap.stanford.edu/data/). The initial run of our code will preprocess these datasets, generating files named `<dataset_name>-compressed_sorted.bin`.
 
-2. **Generated Synthetic Datasets**: Create Erdos-Renyi random graphs by executing `generate_ER.py`. This process generates an edge list file named `ER.txt`.
+2. **Generated Synthetic Datasets**: Create Erdos-Renyi random graphs by executing `generate_synthetic.py`. This process generates an edge list file named `synthetic.txt`.
 
-3. **Preprocessed Datasets**: For convenience, download our preprocessed datasets (in adjacency list and binary formats) from [this link](https://mega.nz/folder/pPghxKpZ#ZZCDT2H844otXKrchH2jbA). 
+3. **Preprocessed Datasets**: For convenience, you can directly download our preprocessed datasets (in adjacency list and binary formats) from [this link](https://mega.nz/folder/pPghxKpZ#ZZCDT2H844otXKrchH2jbA). 
 
 Ensure all datasets are placed in the `BiSPER/datasets` directory.
 
@@ -31,7 +33,7 @@ Ensure all datasets are placed in the `BiSPER/datasets` directory.
 
 ### Calculating Lambda Values (Optional)
 
-Pre-included lambda values are found in `BiSPER/datasets/<dataset_name>.lambda`. To recalculate:
+Pre-calculated lambda values are found in `BiSPER/datasets/<dataset_name>.lambda`. To recalculate:
 
 - Ensure the existence of `<dataset_name>-compressed_sorted.bin` (refer to Dataset Preparation).
 - Execute `python get_lambda.py <dataset_name>` from the BiSPER root directory. The lambda value will be recalculated and saved to `BiSPER/datasets/<dataset_name>.lambda`.
@@ -85,7 +87,7 @@ SPER
 
 #### Argument Details
 
-Below are the detailed explanations of the arguments that can be used with the program:
+Below are detailed explanations of the arguments that can be used with the program:
 
 - `--dataset`: Specifies the dataset to be used. The program initially attempts to locate the compressed and sorted binary file at `BiSPER/datasets/<dataset_name>-compressed_sorted.bin`. If this file cannot be found, it then searches for a text file at `BiSPER/datasets/<dataset_name>.txt`. Should both files be unavailable, the program will raise an exception. The default dataset is `Facebook`.
 
@@ -101,19 +103,22 @@ Below are the detailed explanations of the arguments that can be used with the p
 
 - `--r_max`: Specifies the push threshold for both the `Bipush` and `Push` algorithms. The default value is ```1e-4```.
 
-
-
-
-
-
 Results are stored in `BiSPER/results/` as `.out` files for any text editor access.
 
 ## Plotting Line Charts (Optional)
 
-For re-creating line charts from our papers, execute the following command within the `BiSPER/results/` directory:
+To recreate the line charts in experiments from our papers, execute the following command within the `BiSPER/results/` directory:
 
 ```shell
 python plot.py
 ```
 
 This generates and saves PGF files for visualizations.
+
+To recreate the degree distributions of all datasets in the appendix from our papers, execute the following command within the `BiSPER/` directory:
+
+```shell
+python degree_dist.py <dataset_name>
+```
+
+This generates and saves PDF files for visualizations.

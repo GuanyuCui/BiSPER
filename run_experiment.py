@@ -70,8 +70,8 @@ if __name__ == '__main__':
 				except subprocess.CalledProcessError as e:
 					print(f"Error calling C++ program: {e}")
 	elif experiment == 'IV':
-		assert dataset == 'ER'
-		dataset = 'ER'
+		assert dataset == 'synthetic'
+		dataset = 'synthetic'
 		if algorithm == 'Bipush':
 			num_sampless = ['1000', '10000']
 			r_maxs = ['1e-6', '1e-5', '1e-4']

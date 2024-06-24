@@ -16,4 +16,4 @@ if __name__ == "__main__":
     largest_component_edges = list(largest_component_subgraph.edges())
 
     # Save.
-    save_edges(largest_component_edges, "ER.txt")
+    save_edges(largest_component_edges, "synthetic.txt")

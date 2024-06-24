@@ -49,7 +49,7 @@ def plot_experiment_II(x, y, algorithm2marker, algorithm2color):
     if y == 'max.error':
         y_lims = [(1e-5, 1e-1), (1e-5, 1e-1), (1e-5, 1e-0), (1e-7, 1e-1), (1e-5, 1e-0), (1e-6, 1e-0)]
     elif y == 'avg.error':
-        y_lims = [(1e-6, 1e-2), (1e-6, 1e-1), (1e-6, 1e-1), (1e-7, 1e-2), (1e-6, 1e-1), (1e-7, 1e-1)]
+        y_lims = [(1e-5, 1e-2), (1e-6, 1e-1), (1e-6, 1e-1), (1e-7, 1e-2), (1e-6, 1e-1), (1e-7, 1e-1)]
     
     for (i, dataset_name) in zip(range(len(dataset_names)), dataset_names):
         # Open output file.
@@ -179,7 +179,7 @@ def plot_experiment_IV(algorithm2marker, algorithm2color):
     ax = fig.add_subplot(111)
     
     # Open output file.
-    f = open('ER.out')
+    f = open('synthetic.out')
     # Read contents.
     data = f.readlines()
     # To list, to DataFrame.
@@ -192,7 +192,7 @@ def plot_experiment_IV(algorithm2marker, algorithm2color):
     
     for algorithm_name in algorithm_names:
         if algorithm_name == 'Bipush':
-            r_maxs = ['1e-4', '1e-5']
+            r_maxs = ['1e-4', '1e-5', '1e-6']
             for r_max in r_maxs:
                 # Get data of some algorithm, and sort values.
                 tmp_df = df[(df['Algorithm'] == algorithm_name) & (df['r_max'] == float(r_max))]

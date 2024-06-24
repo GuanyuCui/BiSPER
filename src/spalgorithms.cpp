@@ -1042,17 +1042,18 @@ double SinglePairAlgorithms::BiSPER(Graph::size_type s, Graph::size_type t, Algo
 	Graph::size_type m = G.get_num_edges();
 	Graph::degree_type d = std::min(G.get_d(s), G.get_d(t));
 
-	// L_max + 1 >= eps * d / 2 * sqrt(m) && (L_max + 1) >= m^{3 / 4} * sqrt(eps))
-	if(L_max + 1 >= eps * d / 2.0 * std::sqrt(m) && L_max + 1 >= std::pow(m, 3.0 / 4.0) * std::sqrt(eps))
+	// L_max >= m^{1 / 2} * eps * d / (2 * log^{1 / 2}(2 / p_f)) && L_max >= 2 * m^{3 / 4} * eps^{1 / 2} / (3^{3 / 4} * log^{1 / 4}(2 / p_f)))
+	if(L_max >= std::sqrt(m) * eps * d / (2.0 * std::sqrt(std::log(2.0 / p_f))) 
+		&& L_max >= 2.0 * std::pow(m, 3.0 / 4.0) * std::sqrt(eps) / (std::pow(3.0, 3.0 / 4.0) * std::pow(std::log(2.0 / p_f), 1.0 / 4.0)))
 	{
 		std::cout << "Warning: degenerated to Power-Iteration." << std::endl;
 		r_max = 0.0;
 		this -> reset_zeros("Power-Iteration");
 		return Power_Iteration_ER(s, t, L_max);
 	}
-	// d >= max { 2^{5/6} * (L_max + 1)^{1/3} * log^{1/3}(2 / p_f) / eps^{2/3}, 2 * (L_max + 1) / eps * sqrt(log(2 / p_f) / m) }
-	else if(d >= std::pow(2, 5.0 / 6.0) * std::pow(L_max + 1, 1.0 / 3.0) * std::cbrt(std::log(2.0 / p_f)) / std::pow(eps, 2.0 / 3.0)
-		&& d >= 2.0 * (L_max + 1) / eps * std::sqrt(std::log(2.0 / p_f) / m))
+	// d >= 2^{5 / 3} * (L_max + 1)^{1 / 3} * log^{1 / 3}(2 / p_f) / (3^{1 / 2} * eps^{2 / 3}) && d >= 2 * (L_max + 1) * log^{1 / 2}(2 / p_f) / (m^{1 / 2} * eps)
+	else if(d >= std::pow(2.0, 5.0 / 3.0) * std::cbrt(L_max + 1) * std::cbrt(std::log(2.0 / p_f)) / (std::sqrt(3.0) * std::pow(eps, 2.0 / 3.0)) 
+		&& d >= 2.0 * (L_max + 1) * std::sqrt(std::log(2.0 / p_f)) / (std::sqrt(m) * eps))
 	{
 		std::cout << "Warning: degenerated to Adaptive-Monte-Carlo." << std::endl;
 		r_max = 1.0 / d;
@@ -1060,8 +1061,8 @@ double SinglePairAlgorithms::BiSPER(Graph::size_type s, Graph::size_type t, Algo
 	}
 	else
 	{
-		// r_max = eps^{2/3} / (2 * log(2 / p_f))^{1/3} * (L + 1)^{2/3} * (L + 2)^{2/3} )
-		r_max = std::pow(eps, 2.0 / 3.0) / (std::cbrt(2 * std::log(2.0 / p_f)) * std::pow(L_max + 1, 4.0 / 3.0));
+		// r_max = eps^{2/3} / (2^{2 / 3} * (L_max + 1)^{2 / 3} * (L_max + 2)^{2 / 3} * log^{1 / 3}(2 / p_f))
+		r_max = std::pow(eps, 2.0 / 3.0) / (std::pow(2.0, 2.0 / 3.0) * std::pow(L_max + 1, 2.0 / 3.0) * std::pow(L_max + 2, 2.0 / 3.0) * std::cbrt(std::log(2.0 / p_f)));
 	}
 	this -> reset_zeros("BiSPER");
 	return BiSPER_(s, t, L_max, eps, p_f, r_max);

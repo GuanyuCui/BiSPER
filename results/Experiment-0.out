@@ -1,0 +1,6 @@
+Dataset:Facebook	L_max:100	ER:0.1517248076761349
+Dataset:Facebook	L_max:1000	ER:0.1791247586292560
+Dataset:Facebook	L_max:2000	ER:0.1809474094985925
+Dataset:Facebook	L_max:3000	ER:0.1813844604487833
+Dataset:Facebook	L_max:4000	ER:0.1815159682748923
+Dataset:Facebook	L_max:5000	ER:0.1815587418849417

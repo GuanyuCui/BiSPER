@@ -1,11 +1,24 @@
 # Experiment I.
-python run_experiment.py --experiment I --num_query 1 --L_max 100
-python run_experiment.py --experiment I --num_query 1 --L_max 1000
-python run_experiment.py --experiment I --num_query 1 --L_max 2000
-python run_experiment.py --experiment I --num_query 1 --L_max 5000
-python run_experiment.py --experiment I --num_query 1 --L_max 10000
-python run_experiment.py --experiment I --num_query 1 --L_max 12000
-python run_experiment.py --experiment I --num_query 1 --L_max 15000
-python run_experiment.py --experiment I --num_query 1 --L_max 20000
-python run_experiment.py --experiment I --num_query 1 --L_max 25000
-python run_experiment.py --experiment I --num_query 1 --L_max 27281
+python run_experiment.py --experiment I --dataset Friendster --algorithm BiSPER --L_max 100
+python run_experiment.py --experiment I --dataset Friendster --algorithm GEER --L_max 100
+python run_experiment.py --experiment I --dataset Friendster --algorithm AMC --L_max 100
+
+python run_experiment.py --experiment I --dataset LiveJournal --algorithm BiSPER --L_max 100
+python run_experiment.py --experiment I --dataset LiveJournal --algorithm GEER --L_max 100
+python run_experiment.py --experiment I --dataset LiveJournal --algorithm AMC --L_max 100
+
+python run_experiment.py --experiment I --dataset Orkut --algorithm BiSPER --L_max 100
+python run_experiment.py --experiment I --dataset Orkut --algorithm GEER --L_max 100
+python run_experiment.py --experiment I --dataset Orkut --algorithm AMC --L_max 100
+
+python run_experiment.py --experiment I --dataset Youtube --algorithm BiSPER --L_max 100
+python run_experiment.py --experiment I --dataset Youtube --algorithm GEER --L_max 100
+python run_experiment.py --experiment I --dataset Youtube --algorithm AMC --L_max 100
+
+python run_experiment.py --experiment I --dataset DBLP --algorithm BiSPER --L_max 100
+python run_experiment.py --experiment I --dataset DBLP --algorithm GEER --L_max 100
+python run_experiment.py --experiment I --dataset DBLP --algorithm AMC --L_max 100
+
+python run_experiment.py --experiment I --dataset Facebook --algorithm BiSPER --L_max 100
+python run_experiment.py --experiment I --dataset Facebook --algorithm GEER --L_max 100
+python run_experiment.py --experiment I --dataset Facebook --algorithm AMC --L_max 100

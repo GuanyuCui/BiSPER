@@ -114,11 +114,3 @@ python plot.py
 ```
 
 This generates and saves PGF files for visualizations.
-
-To recreate the degree distributions of all datasets in the appendix from our papers, execute the following command within the `BiSPER/` directory:
-
-```shell
-python degree_dist.py <dataset_name>
-```
-
-This generates and saves PDF files for visualizations.

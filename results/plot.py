@@ -11,7 +11,7 @@ def data2dict(data_str):
         
     return parsed_dict
 
-def plot_experiment_II(x, y, algorithm2marker, algorithm2color):
+def plot_experiment_I(x, y, algorithm2marker, algorithm2color):
     dataset_names = ['Facebook', 'DBLP', 'Youtube', 'Orkut', 'LiveJournal', 'Friendster']
     algorithm_names = ['BiSPER', 'GEER', 'AMC']
 
@@ -102,10 +102,10 @@ def plot_experiment_II(x, y, algorithm2marker, algorithm2color):
     fig.legend(bbox_to_anchor = (0.5, 0.97), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
     # Adjusting vertical and horizontal spacing.
     plt.subplots_adjust(hspace = 0.35, wspace = 0.2)
-    plt.savefig('Experiment-II-results-{}-{}.pgf'.format(x, y), bbox_inches = 'tight')
+    plt.savefig('Experiment-I-results-{}-{}.pgf'.format(x, y), bbox_inches = 'tight')
     # plt.show()
     
-def plot_experiment_III(algorithm2marker, algorithm2color):
+def plot_experiment_II(algorithm2marker, algorithm2color):
     algorithm_names = ['BiSPER', 'GEER', 'Bipush', 'Push']
     columns = ['Algorithm', 'L_max', 'num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
     numeric_columns = ['num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
@@ -123,7 +123,7 @@ def plot_experiment_III(algorithm2marker, algorithm2color):
     # Filter columns.
     df = pd.DataFrame(dict_list)[columns]
     df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors = 'coerce')
-    # Filter data in Experiment III.
+    # Filter data in Experiment II.
     df = df[df['L_max'] == 'auto']
     
     for algorithm_name in algorithm_names:
@@ -167,9 +167,9 @@ def plot_experiment_III(algorithm2marker, algorithm2color):
     fig.legend(bbox_to_anchor = (0.5, 1.02), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
     # Make it square.
     ax.set_aspect(1.0 / ax.get_data_ratio(), adjustable = 'box')
-    plt.savefig('Experiment-III-results.pgf', bbox_inches = 'tight')
+    plt.savefig('Experiment-II-results.pgf', bbox_inches = 'tight')
     
-def plot_experiment_IV(algorithm2marker, algorithm2color):
+def plot_experiment_III(algorithm2marker, algorithm2color):
     algorithm_names = ['BiSPER', 'GEER', 'Bipush', 'Push']
     columns = ['Algorithm', 'L_max', 'num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
     numeric_columns = ['num_samples', 'r_max', 'max.error', 'avg.error', 'avg.time(ms)']
@@ -231,11 +231,11 @@ def plot_experiment_IV(algorithm2marker, algorithm2color):
     fig.legend(bbox_to_anchor = (0.5, 1.02), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
     # Make it square.
     ax.set_aspect(1.0 / ax.get_data_ratio(), adjustable = 'box')
-    plt.savefig('Experiment-IV-results.pgf', bbox_inches = 'tight')
+    plt.savefig('Experiment-III-results.pgf', bbox_inches = 'tight')
     
 if __name__ == '__main__':    
     algorithm2marker = {'BiSPER' : 'D', 'GEER' : 's', 'AMC' : 'o', 'Bipush': 'p', 'Push': 'h'}
     algorithm2color = {'BiSPER' : 'red', 'GEER' : 'blue', 'AMC' : 'orange', 'Bipush': 'purple', 'Push': 'teal'}
-    plot_experiment_II(x = 'avg.time(ms)', y = 'avg.error', algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)
+    plot_experiment_I(x = 'avg.time(ms)', y = 'avg.error', algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)
+    plot_experiment_II(algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)
     plot_experiment_III(algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)
-    plot_experiment_IV(algorithm2marker = algorithm2marker, algorithm2color = algorithm2color)

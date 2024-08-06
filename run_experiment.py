@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 
 if __name__ == '__main__':
 	parser = ArgumentParser()
-	parser.add_argument('--experiment', type = str, default = 'I', help = 'Experiment number. (default = 1)')
+	parser.add_argument('--experiment', type = str, default = '0', help = 'Experiment number. (default = 0)')
 	parser.add_argument('--dataset', type = str, default = 'Facebook', help = 'Dataset. (default = Facebook)')
 	parser.add_argument('--algorithm', type = str, default = 'Power-Iteration', help = 'Algorithm name. (default = Power-Iteration)')
 	parser.add_argument('--num_query', type = str, default = '100', help = 'Number of query pairs. (default = 100)')
@@ -18,14 +18,14 @@ if __name__ == '__main__':
 	L_max = args.L_max
 
 	program_path = './SPER' 
-	if experiment == 'I':
+	if experiment == '0':
 		assert dataset == 'Facebook' and algorithm == 'Power-Iteration' and num_query == '1'
 		command = [program_path, '--dataset', 'Facebook', '--algorithm', 'Power-Iteration', '--num_query', '1', '--L_max', L_max, '--eps', '0.0']
 		try:
 			subprocess.run(command, check = True)
 		except subprocess.CalledProcessError as e:
 			print(f"Error calling C++ program: {e}")
-	elif experiment == 'II':
+	elif experiment == 'I':
 		if algorithm == 'AMC':
 			epsilons = ['1e-1', '2e-1', '5e-1']
 		elif algorithm == 'GEER' and dataset == 'Friendster':
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 				subprocess.run(command, check = True)
 			except subprocess.CalledProcessError as e:
 				print(f"Error calling C++ program: {e}")
-	elif experiment == 'III':
+	elif experiment == 'II':
 		assert dataset == 'Facebook'
 		dataset = 'Facebook'
 		if algorithm == 'Bipush':
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 					subprocess.run(command, check = True)
 				except subprocess.CalledProcessError as e:
 					print(f"Error calling C++ program: {e}")
-	elif experiment == 'IV':
+	elif experiment == 'III':
 		assert dataset == 'synthetic'
 		dataset = 'synthetic'
 		if algorithm == 'Bipush':

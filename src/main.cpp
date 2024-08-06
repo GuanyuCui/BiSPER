@@ -622,7 +622,7 @@ int main(int argc, char * argv[])
 	// Algorithm.
 	SinglePairAlgorithms alg(G);
 
-	// Experiment I.
+	// Experiment 0.
 	if(num_query_pairs == 1)
 	{
 		Graph::size_type s = 1;
@@ -659,7 +659,7 @@ int main(int argc, char * argv[])
 		std::cout << std::endl;
 
 		// File to write results.
-		write_string_to_file("results/Experiment-I.out", 
+		write_string_to_file("results/Experiment-0.out", 
 			"Dataset:" + dataset_name + 
 			"\tL_max:" + (auto_L_max ? "auto" : std::to_string(L_max)) +
 			"\tER:" + doubletostring(result, 16) + "\n"
@@ -676,7 +676,7 @@ int main(int argc, char * argv[])
 	std::cout << std::endl;
 	// Get ground-truth values.
 	Algorithms::length_type L_max_ground_truth = L_max;
-	// Experiment III.
+	// Experiment II/III.
 	if(auto_L_max)
 	{
 		L_max_ground_truth = std::max(1., std::ceil(std::log(4 / (1e-17 * (1. - lambda))) / std::log(1. / lambda)));

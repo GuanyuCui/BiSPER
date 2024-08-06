@@ -65,8 +65,10 @@ Follow these steps to replicate our experiments:
 
 2. Execute a specific experiment script:
 
+**Note**: Experiment 0 stands for the $L_{\max}$-truncated value v.s. $L_{\max}$ experiment in Table 2.
+
     ```shell
-    ./Experiment-[I/II/III/IV].sh
+    ./Experiment-[0/I/II/III].sh
     ```
 
 ### Custom Experiments with SPER

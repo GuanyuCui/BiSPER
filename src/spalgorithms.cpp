@@ -28,6 +28,25 @@ void SinglePairAlgorithms::init_data_stucture(const std::string & algorithm_name
 		this -> mat_s_2_times_n = std::vector<std::vector<double>>(2, std::vector<double>(G.get_adjacency_list().size(), 0.0));
 		this -> mat_t_2_times_n = std::vector<std::vector<double>>(2, std::vector<double>(G.get_adjacency_list().size(), 0.0));
 	}
+	else if(algorithm_name == "BiSPER")
+	{
+		this -> BITs_s = std::vector<SinglePairAlgorithms_Tools::BIT<double>>(G.get_adjacency_list().size(), SinglePairAlgorithms_Tools::BIT<double>(L_max + 2));
+		this -> BITs_t = std::vector<SinglePairAlgorithms_Tools::BIT<double>>(G.get_adjacency_list().size(), SinglePairAlgorithms_Tools::BIT<double>(L_max + 2));
+
+		this -> BITs_visited_s = std::vector<bool>(G.get_adjacency_list().size(), false);
+		this -> BITs_visited_t = std::vector<bool>(G.get_adjacency_list().size(), false);
+
+		// In case of degeneration.
+		this -> init_data_stucture("Power-Iteration", L_max);
+	}
+}
+
+void SinglePairAlgorithms::init_data_stucture_landmark(const std::string & algorithm_name, Graph::size_type landmark)
+{
+	if(algorithm_name == "AbWalk")
+	{
+		// Do nothing.
+	}
 	else if(algorithm_name == "Bipush")
 	{
 		this -> vec_bool_n = std::vector<bool>(G.get_adjacency_list().size(), false);
@@ -45,16 +64,38 @@ void SinglePairAlgorithms::init_data_stucture(const std::string & algorithm_name
 		this -> vec_s_1_n = std::vector<double>(G.get_adjacency_list().size(), 0.0);
 		this -> vec_t_1_n = std::vector<double>(G.get_adjacency_list().size(), 0.0);
 	}
-	else if(algorithm_name == "BiSPER")
+}
+
+void SinglePairAlgorithms::init_data_stucture_vl(const std::string & algorithm_name, std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl, std::vector<std::vector<double>> & Pr, Algorithms::size_type num_samples)
+{
+	if(algorithm_name == "RW-vl")
 	{
-		this -> BITs_s = std::vector<SinglePairAlgorithms_Tools::BIT<double>>(G.get_adjacency_list().size(), SinglePairAlgorithms_Tools::BIT<double>(L_max + 2));
-		this -> BITs_t = std::vector<SinglePairAlgorithms_Tools::BIT<double>>(G.get_adjacency_list().size(), SinglePairAlgorithms_Tools::BIT<double>(L_max + 2));
+		this -> vl = vl;
+		this -> index_vl = index_vl;
+		//std::cout << "Precomouting SC_Inverse..." << std::endl;
+		this -> SCInverse = this -> precompute_SchurComplementInverse(this -> vl, this -> index_vl, Pr);
+		//std::cout << "Done!" << std::endl;
+		//std::cout << "Precomouting P_SCInverse..." << std::endl;
+		this -> Index = this -> combine_P_SCInverse(Pr, this -> SCInverse, this -> index_vl);
+		//std::cout << "Done!" << std::endl;
+	}
+	else if(algorithm_name == "Push-vl" || algorithm_name == "Bipush-vl")
+	{
+		this -> vec_bool_n = std::vector<bool>(G.get_adjacency_list().size(), false);
 
-		this -> BITs_visited_s = std::vector<bool>(G.get_adjacency_list().size(), false);
-		this -> BITs_visited_t = std::vector<bool>(G.get_adjacency_list().size(), false);
+		this -> vec_s_1_n = std::vector<double>(G.get_adjacency_list().size(), 0.0);
+		this -> vec_t_1_n = std::vector<double>(G.get_adjacency_list().size(), 0.0);
+		this -> vec_s_2_n = std::vector<double>(G.get_adjacency_list().size(), 0.0);
+		this -> vec_t_2_n = std::vector<double>(G.get_adjacency_list().size(), 0.0);
 
-		// In case of degeneration.
-		this -> init_data_stucture("Power-Iteration", L_max);
+		this -> vl = vl;
+		this -> index_vl = index_vl;
+		//std::cout << "Precomouting SC_Inverse..." << std::endl;
+		this -> SCInverse = this -> precompute_SchurComplementInverse(this -> vl, this -> index_vl, Pr);
+		//std::cout << "Done!" << std::endl;
+		//std::cout << "Precomouting P_SCInverse..." << std::endl;
+		this -> Index = this -> combine_P_SCInverse(Pr, this -> SCInverse, this -> index_vl);
+		//std::cout << "Done!" << std::endl;
 	}
 }
 
@@ -87,6 +128,10 @@ void SinglePairAlgorithms::reset_zeros(const std::string & algorithm_name)
 			std::fill(vec.begin(), vec.end(), 0.0);
 		}
 	}
+	else if(algorithm_name == "AbWalk" || algorithm_name == "RW-vl")
+	{
+		// Do nothing.
+	}
 	else if(algorithm_name == "Bipush")
 	{
 		std::fill(vec_bool_n.begin(), vec_bool_n.end(), false);
@@ -101,6 +146,14 @@ void SinglePairAlgorithms::reset_zeros(const std::string & algorithm_name)
 		std::fill(vec_bool_n.begin(), vec_bool_n.end(), false);
 		std::fill(vec_s_1_n.begin(), vec_s_1_n.end(), 0.0);
 		std::fill(vec_t_1_n.begin(), vec_t_1_n.end(), 0.0);
+	}
+	else if(algorithm_name == "Push-vl" || algorithm_name == "Bipush-vl")
+	{
+		std::fill(vec_bool_n.begin(), vec_bool_n.end(), false);
+		std::fill(vec_s_1_n.begin(), vec_s_1_n.end(), 0.0);
+		std::fill(vec_t_1_n.begin(), vec_t_1_n.end(), 0.0);
+		std::fill(vec_s_2_n.begin(), vec_s_2_n.end(), 0.0);
+		std::fill(vec_t_2_n.begin(), vec_t_2_n.end(), 0.0);
 	}
 	else if(algorithm_name == "BiSPER")
 	{
@@ -117,6 +170,11 @@ void SinglePairAlgorithms::reset_zeros(const std::string & algorithm_name)
 		}
 		std::fill(BITs_visited_s.begin(), BITs_visited_s.end(), false);
 		std::fill(BITs_visited_t.begin(), BITs_visited_t.end(), false);
+	}
+	else
+	{
+		std::cout << "Algorithm not found!" << std::endl;
+		throw;
 	}
 }
 
@@ -157,24 +215,48 @@ double SinglePairAlgorithms::run(const std::string & algorithm_name, Graph::size
 	return -1;
 }
 
-double SinglePairAlgorithms::run_landmark(const std::string & algorithm_name, Graph::size_type s, Graph::size_type t, Algorithms::size_type num_samples, double r_max)
+double SinglePairAlgorithms::run_landmark(const std::string & algorithm_name, Graph::size_type s, Graph::size_type t, Algorithms::size_type num_landmarks, Algorithms::size_type num_samples, double r_max)
 {
-	Graph::size_type landmark = G.get_max_degree_node();
-	if(algorithm_name == "Bipush")
+	if(algorithm_name == "AbWalk")
 	{
 		double R = 0.0;
-		R = this -> Bipush(s, t, landmark, num_samples, r_max);
+		R = this -> AbWalk(s, t, G.get_max_degree_node(), num_samples);
+		return R;
+	}
+	else if(algorithm_name == "Bipush")
+	{
+		double R = 0.0;
+		R = this -> Bipush(s, t, G.get_max_degree_node(), num_samples, r_max);
 		return R;
 	}
 	else if(algorithm_name == "Push")
 	{
 		double R = 0.0;
-		R = this -> Push(s, t, landmark, r_max);
+		R = this -> Push(s, t, G.get_max_degree_node(), r_max);
+		return R;
+	}
+	else if(algorithm_name == "RW-vl")
+	{
+		double R = 0.0;
+		R = this -> RW_vl(s, t, num_landmarks, num_samples);
+		return R;
+	}
+	else if(algorithm_name == "Push-vl")
+	{
+		double R = 0.0;
+		R = this -> Push_vl(s, t, num_landmarks, r_max, num_samples);
+		return R;
+	}
+	else if(algorithm_name == "Bipush-vl")
+	{
+		double R = 0.0;
+		R = this -> Bipush_vl(s, t, num_landmarks, r_max, num_samples);
 		return R;
 	}
 	throw std::invalid_argument("Algorithm not found!");
 	return -1;
 }
+
 // ------------------------------ Private ------------------------------
 // -------------------- Single-pair transition probability tool algorithms --------------------
 // Ground-truth generation.
@@ -570,6 +652,100 @@ double SinglePairAlgorithms::GEER(Graph::size_type s, Graph::size_type t, Algori
 }
 
 // From SIGMOD'23 paper "Efficient Resistance Distance Computation: the Power of Landmark-based Approaches".
+double SinglePairAlgorithms::AbWalk(Graph::size_type s, Graph::size_type t, Graph::size_type landmark, Algorithms::size_type num_samples)
+{
+	this -> reset_zeros("AbWalk");
+
+	// Random device as seeding source.
+	std::random_device rd;
+	// Seeding.
+	std::mt19937 gen(rd());
+
+	if(s == t)
+	{
+		return 0.0;
+	}
+	double rst = 0.0;
+	if (t == landmark)
+	{
+		for (Algorithms::size_type i = 0; i < num_samples; ++i)
+		{
+			double tao_s = 0.0;
+			Graph::size_type current = s;
+			while (current != landmark)
+			{
+				if(current == s)
+				{
+					tao_s += 1.0;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+			rst += tao_s / (G.get_d(s) * num_samples);
+		}
+		return rst;
+	}
+	else if (s == landmark)
+	{
+		for (Algorithms::size_type i = 0; i < num_samples; ++i)
+		{
+			double tao_t = 0.0;
+			Graph::size_type current = t;
+			while (current != landmark)
+			{
+				if (current == t)
+				{
+					tao_t += 1.0;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+			rst += tao_t / (G.get_d(t) * num_samples);
+		}
+		return rst;
+	}
+	else
+	{
+		for (Algorithms::size_type i = 0; i < num_samples; ++i)
+		{
+			double tao_ss = 0.0;
+			double tao_st = 0.0;
+			Graph::size_type current = s;
+			while (current != landmark)
+			{
+				if (current == s)
+				{
+					tao_ss += 1.0;
+				}
+				if (current == t)
+				{
+					tao_st += 1.0;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+			double tao_ts = 0.0;
+			double tao_tt = 0.0;
+			current = t;
+			while (current != landmark)
+			{
+				if (current == s)
+				{
+					tao_ts += 1.0;
+				}
+				if (current == t)
+				{
+					tao_tt += 1.0;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];;
+			}
+			rst += (tao_ss / (G.get_d(s) * num_samples)) + (tao_tt / (G.get_d(t) * num_samples)) - (tao_st / (G.get_d(t) * num_samples)) - (tao_ts / (G.get_d(s) * num_samples));
+		}
+		return rst;
+	}
+}
+
 void SinglePairAlgorithms::SS_landmark_local_push_res(Graph::size_type s, Graph::size_type landmark, double r_max, std::vector<double> & res, std::vector<double> & result)
 {
 	std::vector<bool> & isInQueue = this -> vec_bool_n;
@@ -767,6 +943,549 @@ double SinglePairAlgorithms::Push(Graph::size_type s, Graph::size_type t, Graph:
 
 	return r;
 }
+
+
+// From SIGMOD'24 paper "Efficient and Provable Effective Resistance Computation on Large Graphs: an Index-based Approach".
+Eigen::MatrixXd SinglePairAlgorithms::vectorOfVectorsToEigenMatrix(const std::vector<std::vector<double>> & data)
+{
+	size_t rows = data.size();
+	size_t cols = data[0].size();
+
+	Eigen::MatrixXd matrix(rows, cols);
+	for (size_t i = 0; i < rows; ++i)
+	{
+		for(size_t j = 0; j < cols; ++j)
+		{
+			matrix(i, j) = data[i][j];
+		}
+	}
+	return matrix;
+}
+
+Eigen::MatrixXd SinglePairAlgorithms::pinv_eigen_based(Eigen::MatrixXd & origin, const double er)
+{
+	Eigen::JacobiSVD<Eigen::MatrixXd> svd_holder(origin, Eigen::ComputeThinU | Eigen::ComputeThinV);
+	Eigen::MatrixXd U = svd_holder.matrixU();
+	Eigen::MatrixXd V = svd_holder.matrixV();
+	Eigen::MatrixXd D = svd_holder.singularValues();
+
+	// S
+	Eigen::MatrixXd S(V.cols(), U.cols());
+	S.setZero();
+
+	for (Eigen::Index i = 0; i < D.size(); ++i)
+	{
+		if (D(i, 0) > er)
+		{
+			S(i, i) = 1.0 / D(i, 0);
+		}
+		else
+		{
+			S(i, i) = 0.0;
+		}
+	}
+
+	// pinv_matrix = V * S * U^T
+	return V * S * U.transpose();
+}
+
+Eigen::MatrixXd SinglePairAlgorithms::pseudo_inverse(const std::vector<std::vector<double>> & data)
+{
+	Eigen::MatrixXd matrix = vectorOfVectorsToEigenMatrix(data);
+	Eigen::MatrixXd pseudoInv = pinv_eigen_based(matrix, 1e-10);
+	return pseudoInv;
+}
+
+std::vector<std::vector<double>> SinglePairAlgorithms::precompute_Pr(std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl, Algorithms::size_type num_samples)
+{
+	std::vector<std::vector<double>> Pr(G.get_num_nodes() - vl.size(), std::vector<double>(vl.size(), 0.0));
+	// Random device as seeding source.
+	std::random_device rd;
+	// Seeding.
+	std::mt19937 gen(rd());
+
+	for (Algorithms::size_type times = 1; times <= num_samples; ++times)
+	{
+		for (Graph::size_type i = 0; i < G.get_num_nodes(); ++i)
+		{
+			if(!(index_vl[i] > 0))
+			{
+				Graph::size_type current = i;
+				while (!(index_vl[current] > 0))
+				{
+					std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+					current = G.get_adjacency_list()[current][dis(gen)];
+				}
+				long long ij = index_vl[current] - 1;
+				long long ii = -index_vl[i];
+				Pr[ii][ij] += 1.0 / num_samples;
+			}            
+		}
+	}
+	return Pr;
+}
+
+Eigen::MatrixXd SinglePairAlgorithms::precompute_SchurComplementInverse(std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl, std::vector<std::vector<double>> & P)
+{
+	std::vector<std::vector<double>> SC(vl.size(), std::vector<double>(vl.size(), 0.0));
+
+	for (size_t i = 0; i < vl.size(); ++i)
+	{
+		Graph::size_type v = vl[i];
+		for (Graph::size_type neighbor : G.get_adjacency_list()[v])
+		{
+			if (!(index_vl[neighbor] > 0))
+			{
+				long long iu = -index_vl[neighbor];
+				for (size_t j = 0; j < vl.size(); ++j)
+				{
+					SC[i][j] -= P[iu][j];
+				}
+			}
+			else
+			{
+				long long iv = index_vl[neighbor] - 1;
+				SC[i][iv] += -1.0;
+			}
+		}
+		SC[i][i] += G.get_d(v);
+	}
+
+	return pseudo_inverse(SC);
+}
+
+std::vector<std::vector<double>> SinglePairAlgorithms::combine_P_SCInverse(std::vector<std::vector<double>> & P, Eigen::MatrixXd SCInverse, std::vector<long long> & index_vl)
+{
+	if(!(SCInverse.rows() == P[0].size()))
+	{
+		throw;
+	}
+	Eigen::Index selectNum = SCInverse.rows();
+	Eigen::Index n = P.size() + selectNum;
+	std::vector<std::vector<double>> Index(n, std::vector<double>(selectNum, 0.0));
+	Eigen::Index v_offset = 0;
+	for(Eigen::Index i = 0; i < n; i++)
+	{
+		if(index_vl[i] > 0)
+		{
+			for(Eigen::Index j = 0; j < selectNum; j++)
+			{
+				Index[i][j] = SCInverse(index_vl[i] - 1, j);
+			}
+			v_offset += 1;
+		}
+		else
+		{
+			Index[i] = P[i - v_offset];
+		}
+	}
+	return Index;
+}
+
+void SinglePairAlgorithms::vl_absorbed_push(Graph::size_type s, const std::vector<long long> & index_vl, double r_max, std::vector<double> & r, std::vector<double> & q)
+{
+	// std::vector<double> r(G.get_num_nodes(), 0.0);
+	// std::vector<double> q(G.get_num_nodes(), 0.0);
+	r[s] = 1.0;
+	std::vector<Graph::size_type> push_queue = {s};
+	// std::vector<bool> is_inQueue(G.get_num_nodes(), false);
+	std::vector<bool> & is_inQueue = this -> vec_bool_n;
+	is_inQueue[s] = true;
+
+	while(!push_queue.empty())
+	{
+		Graph::size_type u = push_queue.back();
+		push_queue.pop_back();
+		is_inQueue[u] = false;
+		q[u] += r[u];
+
+		for (size_t i = 0; i < G.get_adjacency_list()[u].size(); ++i)
+		{
+			Graph::size_type neighbor = G.get_adjacency_list()[u][i];
+			if (!(index_vl[neighbor] > 0))
+			{
+				r[neighbor] += r[u] / G.get_d(u);
+				if (r[neighbor] >= G.get_d(neighbor) * r_max && !is_inQueue[neighbor])
+				{
+					push_queue.push_back(neighbor);
+					is_inQueue[neighbor] = true;
+				}
+			}
+		}
+		r[u] = 0.0;
+	}
+}
+
+
+double SinglePairAlgorithms::RW_vl(Graph::size_type s, Graph::size_type t, Graph::size_type num_landmarks, Algorithms::size_type num_samples)
+{
+	this -> reset_zeros("RW-vl");
+
+	// Random device as seeding source.
+	std::random_device rd;
+	// Seeding.
+	std::mt19937 gen(rd());
+
+	if ((index_vl[s] > 0) && (index_vl[t] > 0))
+	{
+		long long is = index_vl[s] - 1;
+		long long it = index_vl[t] - 1;
+		return SCInverse(is, is) + SCInverse(it, it) - 2 * SCInverse(is, it);
+	}
+	else if (!(index_vl[s] > 0) && (index_vl[t] > 0))
+	{
+		long long it = index_vl[t] - 1;
+
+		double qs_s = 0;
+		for(Algorithms::size_type i = 0; i < num_samples; i++)
+		{
+			Graph::size_type current = s;
+			while(!(index_vl[current] > 0))
+			{
+				if(current == s)
+				{
+					qs_s += 1.0 / num_samples;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+
+		std::vector<double> ps_sci(num_landmarks, 0.0);
+		for(Graph::size_type i = 0;i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				ps_sci[i] += Index[s][j] * SCInverse(j, i);
+			}
+		}
+		double ps_sci_ps = 0.0, ps_scit = 0.0;
+		for (Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			ps_sci_ps += ps_sci[j] * Index[s][j];
+			ps_scit += Index[s][j] * SCInverse(j, it);
+		}
+		return qs_s / G.get_d(s) + ps_sci_ps + SCInverse(it, it) - 2 * ps_scit;
+	}
+	else if((index_vl[s] > 0) && !(index_vl[t] > 0))
+	{
+		long long is = index_vl[s] - 1;
+		
+		double qt_t = 0;
+		for(Algorithms::size_type i = 0; i < num_samples; i++)
+		{
+			Graph::size_type current = t;
+			while(!(index_vl[current] > 0))
+			{
+				if(current == t)
+				{
+					qt_t += 1.0 / num_samples;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+
+		std::vector<double> pt_sci(num_landmarks, 0.0);
+		for (Graph::size_type i = 0; i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				pt_sci[i] += Index[t][j] * SCInverse(j, i);
+			}
+		}
+		double pt_sci_pt = 0.0, pt_scis = 0.0;
+		for (Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			pt_sci_pt += pt_sci[j] * Index[t][j];
+			pt_scis += Index[t][j] * SCInverse(j, is);
+		}
+		return qt_t / G.get_d(t) + pt_sci_pt + SCInverse(is, is) - 2 * pt_scis;
+	}
+	else if (!(index_vl[s] > 0) && !(index_vl[t] > 0))
+	{
+		double qs_s = 0;
+		double qs_t = 0;
+		for(Algorithms::size_type i = 0; i < num_samples; i++)
+		{
+			Graph::size_type current = s;
+			while(!(index_vl[current] > 0))
+			{
+				if(current == s)
+				{
+					qs_s += 1.0 / num_samples;
+				}
+				if(current == t)
+				{
+					qs_t += 1.0 / num_samples;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+
+		double qt_t = 0;
+		double qt_s = 0;
+		for(Algorithms::size_type i = 0; i < num_samples; i++)
+		{
+			Graph::size_type current = t;
+			while(!(index_vl[current] > 0))
+			{
+				if(current == t)
+				{
+					qt_t += 1.0 / num_samples;
+				}
+				if(current == s)
+				{
+					qt_s += 1.0 / num_samples;
+				}
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+
+		std::vector<double> ps_sci(num_landmarks, 0.0);
+		std::vector<double> pt_sci(num_landmarks, 0.0);
+		for (Graph::size_type i = 0; i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				ps_sci[i] += Index[s][j] * SCInverse(j, i);
+				pt_sci[i] += Index[t][j] * SCInverse(j, i);
+			}
+		}
+		double ps_sci_ps = 0.0, pt_sci_pt = 0.0, ps_sci_pt = 0.0;
+		for (Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			ps_sci_ps += ps_sci[j] * Index[s][j];
+			pt_sci_pt += pt_sci[j] * Index[t][j];
+			ps_sci_pt += ps_sci[j] * Index[t][j];
+		}
+		return qs_s / G.get_d(s) + qt_t / G.get_d(t) -  qs_t / G.get_d(t) - qt_s / G.get_d(s) + ps_sci_ps + pt_sci_pt - 2 * ps_sci_pt;
+	}
+	std::cout << "Unexpected Return!!" << std::endl;
+	return 0.0;
+}
+
+double SinglePairAlgorithms::Push_vl(Graph::size_type s, Graph::size_type t, Graph::size_type num_landmarks, double r_max, Algorithms::size_type num_samples)
+{
+	std::vector<double> & qs = this -> vec_s_1_n;
+	std::vector<double> & rs = this -> vec_s_2_n;
+	std::vector<double> & qt = this -> vec_t_1_n;
+	std::vector<double> & rt = this -> vec_t_2_n;
+
+	this -> reset_zeros("Push-vl");
+
+	if ((index_vl[s] > 0) && (index_vl[t] > 0))
+	{
+		long long is = index_vl[s] - 1;
+		long long it = index_vl[t] - 1;
+		return SCInverse(is, is) + SCInverse(it, it) - 2 * SCInverse(is, it);
+	}
+	else if (!(index_vl[s] > 0) && (index_vl[t] > 0))
+	{
+		long long it = index_vl[t] - 1;
+		this -> vl_absorbed_push(s, index_vl, r_max, rs, qs);
+		std::vector<double> ps_sci(num_landmarks, 0.0);
+		for (Graph::size_type i = 0; i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				ps_sci[i] += Index[s][j] * SCInverse(j, i);
+			}
+		}
+		double ps_sci_ps = 0.0, ps_scit = 0.0;
+		for(Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			ps_sci_ps += ps_sci[j] * Index[s][j];
+			ps_scit += Index[s][j] * SCInverse(j, it);
+		}
+		return qs[s] / G.get_d(s) + ps_sci_ps + SCInverse(it, it) - 2 * ps_scit;
+	}
+	else if ((index_vl[s] > 0) && !(index_vl[t] > 0))
+	{
+		long long is = index_vl[s] - 1;
+		vl_absorbed_push(t, index_vl, r_max, rt, qt);
+		std::vector<double> pt_sci(num_landmarks, 0.0);
+		for(Graph::size_type i = 0;i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				pt_sci[i] += Index[t][j] * SCInverse(j, i);
+			}
+		}
+		double pt_sci_pt = 0.0, pt_scis = 0.0;
+		for (Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			pt_sci_pt += pt_sci[j] * Index[t][j];
+			pt_scis += Index[t][j] * SCInverse(j, is);
+		}
+		return qt[t] / G.get_d(t) + pt_sci_pt + SCInverse(is, is) - 2 * pt_scis;
+	}
+	else if(!(index_vl[s] > 0) && !(index_vl[t] > 0))
+	{
+		vl_absorbed_push(s, index_vl, r_max, rs, qs);
+		vl_absorbed_push(t, index_vl, r_max, rt, qt);
+		std::vector<double> ps_sci(num_landmarks, 0.0);
+		std::vector<double> pt_sci(num_landmarks, 0.0);
+		for(Graph::size_type i = 0; i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				ps_sci[i] += Index[s][j] * SCInverse(j, i);
+				pt_sci[i] += Index[t][j] * SCInverse(j, i);
+			}
+		}
+		double ps_sci_ps = 0.0, pt_sci_pt = 0.0, ps_sci_pt = 0.0;
+		for(Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			ps_sci_ps += ps_sci[j] * Index[s][j];
+			pt_sci_pt += pt_sci[j] * Index[t][j];
+			ps_sci_pt += ps_sci[j] * Index[t][j];
+		}
+		return qs[s] / G.get_d(s) + qt[t] / G.get_d(t) - qs[t] / G.get_d(t) - qt[s] / G.get_d(s) + ps_sci_ps + pt_sci_pt - 2 * ps_sci_pt;
+	}
+	std::cout << "Unexpected Return!!" << std::endl;
+	return 0.0;
+}
+
+double SinglePairAlgorithms::Bipush_vl(Graph::size_type s, Graph::size_type t, Graph::size_type num_landmarks, double r_max, Algorithms::size_type num_samples)
+{
+	std::vector<double> & qs = this -> vec_s_1_n;
+	std::vector<double> & rs = this -> vec_s_2_n;
+	std::vector<double> & qt = this -> vec_t_1_n;
+	std::vector<double> & rt = this -> vec_t_2_n;
+
+	this -> reset_zeros("Bipush-vl");
+
+	// Random device as seeding source.
+	std::random_device rd;
+	// Seeding.
+	std::mt19937 gen(rd());
+	
+	if((index_vl[s] > 0) && (index_vl[t] > 0))
+	{
+		long long is = index_vl[s] - 1;
+		long long it = index_vl[t] - 1;
+		return SCInverse(is, is) + SCInverse(it, it) - 2 * SCInverse(is, it);
+	}
+	else if(!(index_vl[s] > 0) && (index_vl[t] > 0))
+	{
+		long long it = index_vl[t] - 1;
+		vl_absorbed_push(s, index_vl, r_max, rs, qs);
+		std::vector<double> ps_sci(num_landmarks, 0.0);
+		for(Graph::size_type i = 0; i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				ps_sci[i] += Index[s][j] * SCInverse(j, i);
+			}
+		}
+		double ps_sci_ps = 0.0, ps_scit = 0.0;
+		for(Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			ps_sci_ps += ps_sci[j] * Index[s][j];
+			ps_scit += Index[s][j] * SCInverse(j, it);
+		}
+		double rst = qs[s] / G.get_d(s) + ps_sci_ps + SCInverse(it, it) - 2 * ps_scit;
+
+		for(Algorithms::size_type i = 0; i < num_samples; ++i)
+		{
+			Graph::size_type current = s;
+			while (!(index_vl[current] > 0))
+			{
+				rst += rs[current] / (G.get_d(current) * num_samples);
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+		return rst;
+	}
+	else if(index_vl[s] > 0 && !(index_vl[t] > 0))
+	{
+		long long is = index_vl[s] - 1;
+		
+		SinglePairAlgorithms::vl_absorbed_push(t, index_vl, r_max, rt, qt);
+		std::vector<double> pt_sci(num_landmarks, 0.0);
+		for(Graph::size_type i = 0; i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				pt_sci[i] += Index[t][j] * SCInverse(j, i);
+			}
+		}
+		double pt_sci_pt = 0.0, pt_scis = 0.0;
+		for(Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			pt_sci_pt += pt_sci[j] * Index[t][j];
+			pt_scis += Index[t][j] * SCInverse(j,is);
+		}
+		double rst = qt[t] / G.get_d(t) + pt_sci_pt + SCInverse(is, is) - 2 * pt_scis;
+
+		for(Algorithms::size_type i = 0; i < num_samples; ++i)
+		{
+			Graph::size_type current = t;
+			while (!(index_vl[current] > 0))
+			{
+				rst += rt[current] / (G.get_d(current) * num_samples);
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+		return rst;
+	}
+	else if(!(index_vl[s] > 0) && !(index_vl[t] > 0))
+	{
+		vl_absorbed_push(s, index_vl, r_max, rs, qs);
+		vl_absorbed_push(t, index_vl, r_max, rt, qt);
+		std::vector<double> ps_sci(num_landmarks, 0.0);
+		std::vector<double> pt_sci(num_landmarks, 0.0);
+		for(Graph::size_type i = 0; i < num_landmarks; ++i)
+		{
+			for(Graph::size_type j = 0; j < num_landmarks; j++)
+			{
+				ps_sci[i] += Index[s][j] * SCInverse(j, i);
+				pt_sci[i] += Index[t][j] * SCInverse(j, i);
+			}
+		}
+		double ps_sci_ps = 0.0, pt_sci_pt = 0.0, ps_sci_pt = 0.0;
+		for (Graph::size_type j = 0; j < num_landmarks; ++j)
+		{
+			ps_sci_ps += ps_sci[j] * Index[s][j];
+			pt_sci_pt += pt_sci[j] * Index[t][j];
+			ps_sci_pt += ps_sci[j] * Index[t][j];
+		}
+		double rst = qs[s] / G.get_d(s) + qt[t] / G.get_d(t) - qs[t] / G.get_d(t) - qt[s] / G.get_d(s) + ps_sci_ps + pt_sci_pt - 2 * ps_sci_pt;
+
+		// double current_time = get_current_time_sec_method();
+		for (Algorithms::size_type i = 0; i < num_samples; ++i)
+		{
+			Graph::size_type current = s;
+			while (!(index_vl[current] > 0))
+			{
+				rst += (rs[current] - rt[current]) / (G.get_d(current) * num_samples);
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+		for (Algorithms::size_type i = 0; i < num_samples; ++i)
+		{
+			Graph::size_type current = t;
+			while (!(index_vl[current] > 0))
+			{
+				rst += (rt[current] - rs[current]) / (G.get_d(current) * num_samples);
+				std::uniform_int_distribution<Graph::degree_type> dis(0, G.get_d(current) - 1);
+				current = G.get_adjacency_list()[current][dis(gen)];
+			}
+		}
+		return rst;
+	}
+	std::cout << "unexpected return!!" << std::endl;
+	throw;
+	return 0.0;
+}
+
+
 
 // Ours.
 double SinglePairAlgorithms::BiSPER_(Graph::size_type s, Graph::size_type t, Algorithms::length_type L_max, double eps, double p_f, double r_max)

@@ -401,6 +401,87 @@ std::vector<double> get_ground_truth_parallel(const std::string & dataset_name, 
 	}
 }
 
+// Save Pr_index
+void save_Pr_index(const std::string & dataset_name, const std::vector<std::vector<double>> & data, 
+					Algorithms::size_type num_landmarks, Algorithms::size_type num_pr_sample = 10000)
+{
+	std::string index_file = "./datasets/" + dataset_name + "-num_pr_sample=" + std::to_string(num_pr_sample) + "-num_landmarks=" + std::to_string(num_landmarks) + ".Prindex";
+	std::ofstream outfile(index_file, std::ios::binary);
+	
+	if (!outfile) {
+		std::cerr << "Cannot open file!" << std::endl;
+		return;
+	}
+
+	// Write outer size.
+	size_t outer_size = data.size();
+	outfile.write(reinterpret_cast<const char*>(&outer_size), sizeof(outer_size));
+
+	// Write inner vectors.
+	for (const auto & inner_vec : data) {
+		// Write inner vector size.
+		size_t inner_size = inner_vec.size();
+		outfile.write(reinterpret_cast<const char*>(&inner_size), sizeof(inner_size));
+
+		// Write inner vector content.
+		outfile.write(reinterpret_cast<const char*>(inner_vec.data()), inner_size * sizeof(double));
+	}
+
+	outfile.close();
+}
+
+// get Pr_index from file or build from scratch.
+std::vector<std::vector<double>> get_Pr_index(const std::string & dataset_name, SinglePairAlgorithms & alg, 
+												std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl, 
+												Algorithms::size_type num_landmarks, Algorithms::size_type num_pr_sample = 10000)
+{
+	std::string index_file = "./datasets/" + dataset_name + "-num_pr_sample=" + std::to_string(num_pr_sample) + "-num_landmarks=" + std::to_string(num_landmarks) + ".Prindex";
+	std::vector<std::vector<double>> data;
+	if(fs::exists(index_file))
+	{
+		std::cout << "Reading indices from file..." << std::endl;
+		std::ifstream infile(index_file, std::ios::binary);
+		
+		if(!infile)
+		{
+			std::cerr << "Cannot open file!" << std::endl;
+			return data;
+		}
+
+		// Read outer size.
+		size_t outer_size;
+		infile.read(reinterpret_cast<char*>(&outer_size), sizeof(outer_size));
+		data.resize(outer_size);
+
+		// Read in vector.
+		for (size_t i = 0; i < outer_size; ++i)
+		{
+			// Read in vector size.
+			size_t inner_size;
+			infile.read(reinterpret_cast<char*>(&inner_size), sizeof(inner_size));
+			data[i].resize(inner_size);
+
+			// Read content.
+			infile.read(reinterpret_cast<char*>(data[i].data()), inner_size * sizeof(double));
+		}
+
+		infile.close();
+		std::cout << "Done." << std::endl;
+		return data;
+	}
+	else
+	{
+		std::cout << "Precomputing indices..." << std::endl;
+		data = alg.precompute_Pr(vl, index_vl, num_pr_sample);
+		std::cout << "Done." << std::endl;
+		std::cout << "Saving indices to file..." << std::endl;
+		save_Pr_index(dataset_name, data, num_landmarks, num_pr_sample);
+		std::cout << "Done." << std::endl;
+		return data;
+	}
+
+}
+
 template <typename KeyType>
 double get_max_error(const std::map<KeyType, double> & ground_truth, const std::map<KeyType, double> & results)
 {
@@ -427,6 +508,7 @@ void print_usage()
 	std::cout << "\t--L_max: set the maximum random walk length in the algorithm, auto if input \"auto\" (default: auto)" << std::endl;
 	std::cout << "\t--eps: set the absolute error parameter \\epsilon in the algorithm. (default: 1e-2)" << std::endl;
 	std::cout << "\t--p_f: set the failure probability p_f in the algorithm. (default: 1e-2)" << std::endl;
+	std::cout << "\t--num_landmarks: set the number of landmarks. (default: 100)" << std::endl;
 	std::cout << "\t--num_samples: set the number of sampled random walks. (default: 10000)" << std::endl;
 	std::cout << "\t--r_max: set the threshold in landmark push algorithms. (default: 1e-4)" << std::endl;
 }
@@ -440,6 +522,7 @@ int main(int argc, char * argv[])
 	Algorithms::length_type L_max = 0;
 	double eps = 1e-2;
 	double p_f = 1e-2;
+	Algorithms::size_type num_landmarks = 100;
 	Algorithms::size_type num_samples = 10000;
 	double r_max = 1e-4;
 
@@ -541,6 +624,19 @@ int main(int argc, char * argv[])
 				return -1;
 			}
 		}
+		else if(arg == "--num_landmarks")
+		{
+			if (i + 1 < argc)
+			{
+				num_landmarks = std::stoull(argv[i + 1]);
+				i++;
+			}
+			else
+			{
+				std::cerr << "--num_landmarks requires a value!" << std::endl;
+				return -1;
+			}
+		}
 		else if(arg == "--num_samples")
 		{
 			if (i + 1 < argc)
@@ -581,6 +677,7 @@ int main(int argc, char * argv[])
 	std::cout << "L_max: " << (auto_L_max ? "auto" : std::to_string(L_max)) << std::endl;
 	std::cout << "epsilon: " << eps << std::endl;
 	std::cout << "p_f: " << p_f << std::endl;
+	std::cout << "num_landmarks: " << num_landmarks << std::endl;
 	std::cout << "num_samples: " << num_samples << std::endl;
 	std::cout << "r_max: " << r_max << std::endl;
 	std::cout << std::endl;
@@ -671,6 +768,32 @@ int main(int argc, char * argv[])
 	// Node sampler.
 	NodeSampler sampler(G);
 
+	// Get landmark nodes.
+	std::vector<Graph::size_type> vl;
+	std::vector<long long> index_vl(G.get_num_nodes(), 0);
+	if(algorithm_name == "RW-vl" || algorithm_name == "Push-vl" || algorithm_name == "Bipush-vl")
+	{
+		vl = sampler.max_degree(num_landmarks);
+		auto generate_index_vl = [&G](std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl) 
+		{
+			// std::vector<int> index_vl(n, 0);
+			for(size_t i = 1; i <= vl.size(); i++)
+			{
+				index_vl[vl[i - 1]] = i;
+			}
+			long long u_ind = 0;
+			for(size_t i = 0; i < G.get_num_nodes(); i++)
+			{
+				if(index_vl[i] == 0)
+				{
+					index_vl[i] = u_ind;
+					u_ind -= 1;
+				}
+			}
+		};
+		generate_index_vl(vl, index_vl);
+	}
+
 	// Get query nodes.
 	std::vector<Graph::size_type> query_nodes = get_query_nodes(dataset_name, sampler, "uniform", 2 * num_query_pairs);
 	std::cout << std::endl;
@@ -694,11 +817,35 @@ int main(int argc, char * argv[])
 	if(auto_L_max)
 	{
 		Algorithms::length_type L_max_eps = std::max(1., std::ceil(std::log(4 / (eps * (1. - lambda))) / std::log(1. / lambda)));
-		alg.init_data_stucture(algorithm_name, L_max_eps);
+		if(algorithm_name == "AbWalk" || algorithm_name == "Push" || algorithm_name == "Bipush")
+		{
+			alg.init_data_stucture_landmark(algorithm_name, G.get_max_degree_node());
+		}
+		else if(algorithm_name == "RW-vl"|| algorithm_name == "Push-vl" || algorithm_name == "Bipush-vl")
+		{
+			std::vector<std::vector<double>> Pr = get_Pr_index(dataset_name, alg, vl, index_vl, num_landmarks, 100000);
+			alg.init_data_stucture_vl(algorithm_name, vl, index_vl, Pr, num_samples);
+		}
+		else
+		{
+			alg.init_data_stucture(algorithm_name, L_max_eps);
+		}
 	}
 	else
 	{
-		alg.init_data_stucture(algorithm_name, L_max);
+		if(algorithm_name == "AbWalk" || algorithm_name == "Push" || algorithm_name == "Bipush")
+		{
+			alg.init_data_stucture_landmark(algorithm_name, G.get_max_degree_node());
+		}
+		else if(algorithm_name == "RW-vl"|| algorithm_name == "Push-vl" || algorithm_name == "Bipush-vl")
+		{
+			std::vector<std::vector<double>> Pr = get_Pr_index(dataset_name, alg, vl, index_vl, num_landmarks, 100000);
+			alg.init_data_stucture_vl(algorithm_name, vl, index_vl, Pr, num_samples);
+		}
+		else
+		{
+			alg.init_data_stucture(algorithm_name, L_max);
+		}
 	}
 	timer.stop();
 	std::cout << "Done." << std::endl;
@@ -725,9 +872,10 @@ int main(int argc, char * argv[])
 		double result = 0.0;
 		timer.clear();
 		timer.start();
-		if(algorithm_name == "Push" || algorithm_name == "Bipush")
+		if(algorithm_name == "AbWalk" || algorithm_name == "Push" || algorithm_name == "Bipush"
+			|| algorithm_name == "RW-vl" || algorithm_name == "Push-vl" || algorithm_name == "Bipush-vl")
 		{
-			result = alg.run_landmark(algorithm_name, s, t, num_samples, r_max);
+			result = alg.run_landmark(algorithm_name, s, t, num_landmarks, num_samples, r_max);
 		}
 		else
 		{

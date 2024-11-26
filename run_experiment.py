@@ -39,8 +39,7 @@ if __name__ == '__main__':
 			except subprocess.CalledProcessError as e:
 				print(f"Error calling C++ program: {e}")
 	elif experiment == 'II':
-		assert dataset == 'Facebook'
-		dataset = 'Facebook'
+		assert dataset in ['Facebook']
 		if algorithm == 'Bipush':
 			num_sampless = ['1000', '10000', '100000']
 			r_maxs = ['1e-6', '1e-5', '1e-4']
@@ -53,7 +52,40 @@ if __name__ == '__main__':
 		elif algorithm == 'Push':
 			r_maxs = ['1e-10', '1e-9', '1e-8', '1e-7', '1e-6', '1e-5', '1e-4']
 			for r_max in r_maxs:
-				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', '0', '--r_max', r_max]
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'AbWalk':
+			num_sampless = ['100000', '500000', '1000000']
+			for num_samples in num_sampless:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', num_samples]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'Bipush-vl':
+			num_sampless = ['1000']
+			r_maxs = ['1e-7', '2e-7', '3e-7']
+			for r_max, num_samples in itertools.product(r_maxs, num_sampless):
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', num_samples, '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'Push-vl':
+			r_maxs = ['1e-7', '2e-7', '3e-7']
+			for r_max in r_maxs:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'RW-vl':
+			num_sampless = ['1000000', '5000000', '10000000']
+			for num_samples in num_sampless:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', num_samples]
 				try:
 					subprocess.run(command, check = True)
 				except subprocess.CalledProcessError as e:
@@ -85,6 +117,39 @@ if __name__ == '__main__':
 			r_maxs = ['1e-7', '1e-6', '1e-5', '1e-4', '1e-3', '1e-2', '1e-1']
 			for r_max in r_maxs:
 				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', '0', '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'AbWalk':
+			num_sampless = ['1000', '5000', '10000']
+			for num_samples in num_sampless:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', num_samples]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'Bipush-vl':
+			num_sampless = ['1000']
+			r_maxs = ['1e-7', '2e-7', '3e-7']
+			for r_max, num_samples in itertools.product(r_maxs, num_sampless):
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', num_samples, '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'Push-vl':
+			r_maxs = ['1e-7', '2e-7', '3e-7']
+			for r_max in r_maxs:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--r_max', r_max]
+				try:
+					subprocess.run(command, check = True)
+				except subprocess.CalledProcessError as e:
+					print(f"Error calling C++ program: {e}")
+		elif algorithm == 'RW-vl':
+			num_sampless = ['10000', '50000', '100000']
+			for num_samples in num_sampless:
+				command = [program_path, '--dataset', dataset, '--algorithm', algorithm, '--num_query', num_query, '--num_samples', num_samples]
 				try:
 					subprocess.run(command, check = True)
 				except subprocess.CalledProcessError as e:

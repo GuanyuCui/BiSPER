@@ -60,12 +60,15 @@ class SinglePairAlgorithms : public Algorithms
 		SinglePairAlgorithms(const Graph & G);
 		virtual ~SinglePairAlgorithms() = default;
 		void init_data_stucture(const std::string & algorithm_name, Algorithms::length_type L_max);
+		void init_data_stucture_landmark(const std::string & algorithm_name, Graph::size_type landmark);
+		void init_data_stucture_vl(const std::string & algorithm_name, std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl, std::vector<std::vector<double>> & Pr, Algorithms::size_type num_samples);
+		std::vector<std::vector<double>> precompute_Pr(std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl, Algorithms::size_type num_samples);
 		void reset_zeros(const std::string & algorithm_name);
 		// -------------------- Single-pair --------------------
 		// Interface for running single-pair effective resistance algorithms.
 		// For AMC, GEER, and our BiSPER
 		double run(const std::string & algorithm_name, Graph::size_type s, Graph::size_type t, Algorithms::length_type L_max, double eps, double p_f);
-		double run_landmark(const std::string & algorithm_name, Graph::size_type s, Graph::size_type t, Algorithms::size_type num_samples, double r_max);
+		double run_landmark(const std::string & algorithm_name, Graph::size_type s, Graph::size_type t, Algorithms::size_type num_landmarks, Algorithms::size_type num_samples, double r_max);
 
 	private:
 		// -------------------- Single-pair transition probability tool algorithms --------------------
@@ -80,10 +83,23 @@ class SinglePairAlgorithms : public Algorithms
 		double GEER(Graph::size_type s, Graph::size_type t, Algorithms::length_type L_max, double eps, double p_f, Algorithms::size_type tau = 5);
 
 		// From SIGMOD'23 paper "Efficient Resistance Distance Computation: the Power of Landmark-based Approaches".
+		double AbWalk(Graph::size_type s, Graph::size_type t, Graph::size_type landmark, Algorithms::size_type num_samples);
 		void SS_landmark_local_push_res(Graph::size_type s, Graph::size_type landmark, double r_max, std::vector<double> & res, std::vector<double> & result);
 		double Bipush(Graph::size_type s, Graph::size_type t, Graph::size_type landmark, Algorithms::size_type num_samples, double r_max);
 		void SS_landmark_local_push(Graph::size_type s, Graph::size_type landmark, double r_max, std::vector<double> & result);
 		double Push(Graph::size_type s, Graph::size_type t, Graph::size_type landmark, double r_max);
+
+		// From SIGMOD'24 paper "Efficient and Provable Effective Resistance Computation on Large Graphs: an Index-based Approach".
+		Eigen::MatrixXd vectorOfVectorsToEigenMatrix(const std::vector<std::vector<double>> & data);
+		Eigen::MatrixXd pinv_eigen_based(Eigen::MatrixXd & origin, const double er);
+		Eigen::MatrixXd pseudo_inverse(const std::vector<std::vector<double>> & data);
+		
+		Eigen::MatrixXd precompute_SchurComplementInverse(std::vector<Graph::size_type> & vl, std::vector<long long> & index_vl, std::vector<std::vector<double>> & P);
+		std::vector<std::vector<double>> combine_P_SCInverse(std::vector<std::vector<double>> & P, Eigen::MatrixXd SCInverse, std::vector<long long> & index_vl);
+		void vl_absorbed_push(Graph::size_type s, const std::vector<long long> & index_vl, double r_max, std::vector<double> & r, std::vector<double> & q);
+		double RW_vl(Graph::size_type s, Graph::size_type t, Graph::size_type num_landmarks, Algorithms::size_type num_samples);
+		double Push_vl(Graph::size_type s, Graph::size_type t, Graph::size_type num_landmarks, double r_max, Algorithms::size_type num_samples);
+		double Bipush_vl(Graph::size_type s, Graph::size_type t, Graph::size_type num_landmarks, double r_max, Algorithms::size_type num_samples);
 
 		// Ours.
 		double BiSPER_(Graph::size_type s, Graph::size_type t, Algorithms::length_type L_max, double eps, double p_f, double r_max);
@@ -98,16 +114,23 @@ class SinglePairAlgorithms : public Algorithms
 		std::vector<std::vector<double>> mat_s_2_times_n;
 		std::vector<std::vector<double>> mat_t_2_times_n;
 
-		// AMC, SS_landmark_local_push_res, SS_landmark_local_push
+		// AMC, SS_landmark_local_push_res, SS_landmark_local_push, LocalTree
 		std::vector<double> vec_1_n;
 		std::vector<double> vec_2_n;
 		std::vector<bool> vec_bool_n;
 
-		// Bipush, Push
+		// Bipush, Push, er_vl_bipush
 		std::vector<double> vec_s_1_n;
 		std::vector<double> vec_t_1_n;
 		std::vector<double> vec_s_2_n;
 		std::vector<double> vec_t_2_n;
+
+		// er_vl_bipush
+		std::vector<Graph::size_type> vl;
+		std::vector<long long> index_vl;
+		// std::vector<std::vector<double>> Pr;
+		Eigen::MatrixXd SCInverse;
+		std::vector<std::vector<double>> Index;
 
 		// BiSPER
 		std::vector<SinglePairAlgorithms_Tools::BIT<double>> BITs_s;

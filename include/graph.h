@@ -13,6 +13,7 @@
 #include <algorithm>
 
 #include "eigen-3.4.0/Eigen/Sparse"
+#include "eigen-3.4.0/Eigen/Dense"
 
 class Graph
 {

@@ -82,7 +82,8 @@ SPER
     [--num_query <num_query>] 
     [--L_max <L_max>] 
     [--eps <eps>] 
-    [--p_f <p_f>] 
+    [--p_f <p_f>]
+    [--num_landmarks <num_landmarks>]
     [--num_samples <num_samples>] 
     [--r_max <r_max>]
 ```
@@ -101,7 +102,9 @@ Below are detailed explanations of the arguments that can be used with the progr
 
 - `--eps`: Sets the desired absolute error guarantee, $\epsilon$. This parameter is relevant only for the `BiSPER`, `AMC`, and `GEER` algorithms. The default value is ```1e-2```.
 
-- `--num_samples`: Indicates the number of random walks to sample in the `Bipush` algorithm. The default is `10,000`.
+- `--num_landmarks`: Indicates the number of landmark nodes in the `Bipush-vl`, `Push-vl`, and `RW-vl` algorithms. The default value is `100`.
+
+- `--num_samples`: Indicates the number of random walks to sample in the `Bipush` algorithm. The default value is `10,000`.
 
 - `--r_max`: Specifies the push threshold for both the `Bipush` and `Push` algorithms. The default value is ```1e-4```.
 

@@ -1,5 +1,8 @@
 # BiSPER
 
+*(This is the official GitHub repository for the KDD 2025 paper: Mixing Time Matters: Accelerating Effective Resistance Estimation via Bidirectional Method.)*
+
+
 Welcome to the official BiSPER documentation. This guide provides a comprehensive walkthrough to replicate our experiments, covering everything from dataset preparation and code compilation to running experiments and plotting results.
 
 ## Environment Setup
@@ -49,7 +52,7 @@ mv SPER ..
 cd ..
 ```
 
-**Credit**: Code for AMC / GEER algorithms are from [their official GitHub page](https://github.com/AnryYang/GEER) and code for Bipush / Push algorithms are from [their official GitHub page](https://github.com/mhliao516/Resistance-Landmark).
+**Credit**: Code for Eigen 3.4 is taken from [the official website](https://eigen.tuxfamily.org/) of the Eigen library, code for AMC / GEER algorithms are from [their official GitHub page](https://github.com/AnryYang/GEER), code for Bipush / Push / AbWalk algorithms are from [their official GitHub page](https://github.com/mhliao516/Resistance-Landmark), and code for Bipush-vl / Push-vl / RW-vl algorithms are from [their official GitHub page](https://github.com/mhliao0516/EffectiveResistanceMultipleLandmark).
 
 ## Running Experiments
 

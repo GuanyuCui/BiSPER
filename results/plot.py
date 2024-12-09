@@ -21,8 +21,10 @@ def plot_experiment_I(x, y, L_max : str, algorithm2marker, algorithm2color):
     
     sns.set_theme(style = "ticks")
     num_subplot_cols = 3
-    num_subplot_rows = 2 # math.ceil(len(dataset_names) / num_subplot_cols)
-    fig, axes = plt.subplots(num_subplot_rows, num_subplot_cols, figsize = (16, 8))
+    num_subplot_rows = 2 
+    
+    side_length = 5  # Length of each square subplot
+    fig, axes = plt.subplots(num_subplot_rows, num_subplot_cols, figsize = (side_length * num_subplot_cols, side_length * num_subplot_rows))
     
     # List to store added algorithm labels.
     added_labels = []
@@ -101,7 +103,7 @@ def plot_experiment_I(x, y, L_max : str, algorithm2marker, algorithm2color):
         ax.set_title(dataset_name, fontsize = 14)
 
             
-    fig.legend(bbox_to_anchor = (0.5, 0.97), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
+    fig.legend(bbox_to_anchor = (0.5, 0.95), loc = 'upper center', ncols = len(algorithm_names), frameon = False, fontsize = 14)
     # Adjusting vertical and horizontal spacing.
     plt.subplots_adjust(hspace = 0.35, wspace = 0.2)
     plt.savefig('Experiment-I-results-{}-{}.pgf'.format(x, y), bbox_inches = 'tight')
@@ -170,7 +172,7 @@ def plot_experiment_II(algorithm2marker, algorithm2color):
     handles, labels = plt.gca().get_legend_handles_labels()
 
     # Row-first
-    nrow = 2
+    nrow = 3
     ncol = math.ceil(len(handles) / nrow)
 
     handles_labels = list(zip(handles, labels))
@@ -182,7 +184,7 @@ def plot_experiment_II(algorithm2marker, algorithm2color):
     ]
     handles_sorted, labels_sorted = zip(*handles_labels_sorted)
             
-    fig.legend(handles_sorted, labels_sorted, bbox_to_anchor = (0.5, 1.05), loc = 'upper center', ncols = ncol, frameon = False, fontsize = 14)
+    fig.legend(handles_sorted, labels_sorted, bbox_to_anchor = (0.5, 1.15), loc = 'upper center', ncols = ncol, frameon = False, fontsize = 14)
     # Make it square.
     ax.set_aspect(1.0 / ax.get_data_ratio(), adjustable = 'box')
     plt.savefig('Experiment-II-results.pgf', bbox_inches = 'tight')
@@ -250,7 +252,7 @@ def plot_experiment_III(algorithm2marker, algorithm2color):
     handles, labels = plt.gca().get_legend_handles_labels()
 
     # Row-first
-    nrow = 2
+    nrow = 3
     ncol = math.ceil(len(handles) / nrow)
 
     handles_labels = list(zip(handles, labels))
@@ -262,7 +264,7 @@ def plot_experiment_III(algorithm2marker, algorithm2color):
     ]
     handles_sorted, labels_sorted = zip(*handles_labels_sorted)
             
-    fig.legend(handles_sorted, labels_sorted, bbox_to_anchor = (0.5, 1.05), loc = 'upper center', ncols = ncol, frameon = False, fontsize = 14)
+    fig.legend(handles_sorted, labels_sorted, bbox_to_anchor = (0.5, 1.15), loc = 'upper center', ncols = ncol, frameon = False, fontsize = 14)
     # Make it square.
     ax.set_aspect(1.0 / ax.get_data_ratio(), adjustable = 'box')
     plt.savefig('Experiment-III-results.pgf', bbox_inches = 'tight')
